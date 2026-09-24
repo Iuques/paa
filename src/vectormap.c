@@ -1,12 +1,31 @@
 #include "includes/vectormap.h"
-#include "includes/entry.h"
 #include <stdlib.h>
 #include <string.h>
 
-void addEntryVectorMap(VectorMap* map, char* name, int value) {
-    if(map == NULL) return;
+VectorMap* buildVectorMap(void) {
+    VectorMap* map = malloc(sizeof(VectorMap));
+    if (map == NULL) {
+        return NULL;
+    }
 
-    if(map->size == map->capacity) {
+    map->capacity = 10;
+    map->size = 0;
+    map->entries = malloc((size_t)map->capacity * sizeof(Entry));
+
+    if (map->entries == NULL) {
+        free(map);
+        return NULL;
+    }
+
+    return map;
+}
+
+void addEntryVectorMap(VectorMap* map, char* name, int value) {
+    if (map == NULL || name == NULL) {
+        return;
+    }
+
+    if (map->size == map->capacity) {
         doubleCapacityNowPlusUltraMegaBlasterVectorMap(map);
     }
 
@@ -14,24 +33,29 @@ void addEntryVectorMap(VectorMap* map, char* name, int value) {
     map->size++;
 }
 
-
 void doubleCapacityNowPlusUltraMegaBlasterVectorMap(VectorMap* map) {
-    if(map == NULL) return;
+    if (map == NULL) {
+        return;
+    }
 
     int newCapacity = map->capacity > 0 ? map->capacity * 2 : 10;
-    Entry* newEntry = realloc(map->entries, newCapacity * sizeof(*newEntry));
+    Entry* newEntries = realloc(map->entries, (size_t)newCapacity * sizeof(Entry));
 
-    if(newEntry == NULL) return;
+    if (newEntries == NULL) {
+        return;
+    }
 
-    map->entries = newEntry;
+    map->entries = newEntries;
     map->capacity = newCapacity;
 }
 
 Entry* searchEntryVectorMap(VectorMap* map, char* name) {
-    if(map == NULL || name == NULL) return NULL;
+    if (map == NULL || name == NULL) {
+        return NULL;
+    }
 
-    for(int i = 0; i < map->size; i++) {
-        if(strcmp(map->entries[i].name, name) == 0) {
+    for (int i = 0; i < map->size; i++) {
+        if (strcmp(map->entries[i].name, name) == 0) {
             return &map->entries[i];
         }
     }
@@ -40,11 +64,13 @@ Entry* searchEntryVectorMap(VectorMap* map, char* name) {
 }
 
 void removeEntryVectorMap(VectorMap* map, char* name) {
-    if(map == NULL || name == NULL) return;
+    if (map == NULL || name == NULL) {
+        return;
+    }
 
-    for(int i = 0; i < map->size; i++) {
-        if(strcmp(map->entries[i].name, name) == 0) {
-            for(int j = i; j < map->size - 1; j++) {
+    for (int i = 0; i < map->size; i++) {
+        if (strcmp(map->entries[i].name, name) == 0) {
+            for (int j = i; j < map->size - 1; j++) {
                 map->entries[j] = map->entries[j + 1];
             }
             map->size--;

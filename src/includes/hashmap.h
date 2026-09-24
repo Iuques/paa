@@ -17,8 +17,8 @@ void addEntryHashMap(HashMap* map, char* name, int value);
 
 void doubleCapacityNowPlusUltraMegaBlasterHashMap(HashMap* map);
 
-Entry* searchEntryHashMap(VectorMap* map, char* name);
+Entry* searchEntryHashMap(HashMap* map, char* name);
 
-void removeEntryHashMap(VectorMap* map, char* name);
+void removeEntryHashMap(HashMap* map, char* name);
 
 #endif

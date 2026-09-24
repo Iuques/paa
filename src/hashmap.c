@@ -1,75 +1,93 @@
-#include "includes/vectormap.h"
-#include "includes/entry.h"
 #include "includes/hashmap.h"
 #include <stdlib.h>
 #include <string.h>
 
-int hash(char* key) {
-
-    if(key == null || key[0] == '\0') return -1;
-
-    int hash = 2;
-    for (char *p = str; *p != '\0'; p++) {
-        hash += 31 * hash + *p;
+HashMap* buildHashMap(void) {
+    HashMap* map = malloc(sizeof(HashMap));
+    if (map == NULL) {
+        return NULL;
     }
 
-    return hash;
+    map->capacity = 10;
+    map->size = 0;
+    map->buckets = calloc((size_t)map->capacity, sizeof(VectorMap*));
+
+    if (map->buckets == NULL) {
+        free(map);
+        return NULL;
+    }
+
+    for (int i = 0; i < map->capacity; i++) {
+        map->buckets[i] = buildVectorMap();
+    }
+
+    return map;
+}
+
+int hash(char* key) {
+    if (key == NULL || key[0] == '\0') {
+        return -1;
+    }
+
+    unsigned long hash_value = 5381;
+    for (const unsigned char* p = (const unsigned char*)key; *p != '\0'; p++) {
+        hash_value = ((hash_value << 5) + hash_value) + *p;
+    }
+
+    return (int)(hash_value & 0x7fffffffUL);
 }
 
 void addEntryHashMap(HashMap* map, char* name, int value) {
-    if(map == NULL) return;
+    if (map == NULL || name == NULL) {
+        return;
+    }
 
     if ((double)map->size >= map->capacity * 0.7) {
         doubleCapacityNowPlusUltraMegaBlasterHashMap(map);
     }
 
-    VectorMap* vectorMap =
-        map->buckets[hash(name) % map->capacity];
+    VectorMap* vectorMap = map->buckets[hash(name) % map->capacity];
+    if (vectorMap == NULL) {
+        return;
+    }
+
+    Entry* existing = searchEntryVectorMap(vectorMap, name);
+    if (existing != NULL) {
+        existing->value = value;
+        return;
+    }
 
     addEntryVectorMap(vectorMap, name, value);
     map->size++;
 }
 
-
 void doubleCapacityNowPlusUltraMegaBlasterHashMap(HashMap* map) {
-    if(map == NULL) return;
+    if (map == NULL) {
+        return;
+    }
 
+    int oldCapacity = map->capacity;
     int newCapacity = map->capacity > 0 ? map->capacity * 2 : 10;
-    VectorMap** newBuckets =
-        malloc(newCapacity * sizeof(VectorMap*));
+    VectorMap** newBuckets = calloc((size_t)newCapacity, sizeof(VectorMap*));
 
     if (newBuckets == NULL) {
         return;
     }
 
     for (int i = 0; i < newCapacity; i++) {
-        VectorMap* newBucket = malloc(sizeof(VectorMap));
-
-        if (newBucket == NULL) {
-            return;
-        }
-
-        newBucket->entries = malloc(10 * sizeof(Entry));
-        newBucket->capacity = 10;
-        newBucket->size = 0;
-
-        newBuckets[i] = newBucket;
+        newBuckets[i] = buildVectorMap();
     }
 
-    ffor (int i = 0; i < oldCapacity; i++) {
+    for (int i = 0; i < oldCapacity; i++) {
         VectorMap* oldVector = map->buckets[i];
+        if (oldVector == NULL) {
+            continue;
+        }
 
         for (int j = 0; j < oldVector->size; j++) {
             Entry entry = oldVector->entries[j];
-
-            VectorMap* newVector =
-                newBuckets[hash(entry.name) % newCapacity];
-
-            addEntryVectorMap(
-                newVector,
-                entry.name,
-                entry.value
-            );
+            VectorMap* newVector = newBuckets[hash(entry.name) % newCapacity];
+            addEntryVectorMap(newVector, entry.name, entry.value);
         }
 
         free(oldVector->entries);
@@ -77,23 +95,40 @@ void doubleCapacityNowPlusUltraMegaBlasterHashMap(HashMap* map) {
     }
 
     free(map->buckets);
-
     map->buckets = newBuckets;
     map->capacity = newCapacity;
 }
 
 Entry* searchEntryHashMap(HashMap* map, char* name) {
-    if(map == NULL || name == NULL) return NULL;
+    if (map == NULL || name == NULL || map->capacity <= 0) {
+        return NULL;
+    }
 
     VectorMap* bucket = map->buckets[hash(name) % map->capacity];
+    if (bucket == NULL) {
+        return NULL;
+    }
 
     return searchEntryVectorMap(bucket, name);
 }
 
 void removeEntryHashMap(HashMap* map, char* name) {
-    if(map == NULL || name == NULL) return NULL;
+    if (map == NULL || name == NULL || map->capacity <= 0) {
+        return;
+    }
 
     VectorMap* bucket = map->buckets[hash(name) % map->capacity];
+    if (bucket == NULL) {
+        return;
+    }
 
-    return removeEntryVectorMap(bucket, name);
+    Entry* found = searchEntryVectorMap(bucket, name);
+    if (found == NULL) {
+        return;
+    }
+
+    removeEntryVectorMap(bucket, name);
+    if (map->size > 0) {
+        map->size--;
+    }
 }

@@ -1,13 +1,13 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "map.h"
+#include "entry.h"
 
 #define FILE_IN_NAME "input.txt"
 #define FILE_OUT_NAME "output.txt"
 
-void readFile(Map* map);
+void readFile(Entry* entries);
 
-void writeFile(Map* map);
+void writeFile(Entry* entries);
 
 #endif

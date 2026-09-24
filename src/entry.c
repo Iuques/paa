@@ -1,5 +1,5 @@
-#include "includes/map.h"
+#include "includes/entry.h"
 
-Entry* buildEntry(char* name, int value) {
+Entry buildEntry(char* name, int value) {
     return (Entry){.name = name, .value = value};
 }
