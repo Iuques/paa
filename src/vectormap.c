@@ -1,23 +1,21 @@
-#include "includes/map.h"
+#include "includes/vectormap.h"
+#include "includes/entry.h"
 #include <stdlib.h>
 #include <string.h>
 
-
-void addEntry(Map* map, char* name, int value) {
+void addEntryVectorMap(VectorMap* map, char* name, int value) {
     if(map == NULL) return;
 
     if(map->size == map->capacity) {
-        doubleCapacityNowPlusUltraMegaBlaster(map);
+        doubleCapacityNowPlusUltraMegaBlasterVectorMap(map);
     }
 
-    Entry newEntry = {.name = name, .value = value};
-
-    map->entries[map->size] = newEntry;
+    map->entries[map->size] = buildEntry(name, value);
     map->size++;
 }
 
 
-void doubleCapacityNowPlusUltraMegaBlaster(Map* map) {
+void doubleCapacityNowPlusUltraMegaBlasterVectorMap(VectorMap* map) {
     if(map == NULL) return;
 
     int newCapacity = map->capacity > 0 ? map->capacity * 2 : 10;
@@ -29,7 +27,7 @@ void doubleCapacityNowPlusUltraMegaBlaster(Map* map) {
     map->capacity = newCapacity;
 }
 
-Entry* searchEntry(Map* map, char* name) {
+Entry* searchEntryVectorMap(VectorMap* map, char* name) {
     if(map == NULL || name == NULL) return NULL;
 
     for(int i = 0; i < map->size; i++) {
@@ -41,7 +39,7 @@ Entry* searchEntry(Map* map, char* name) {
     return NULL;
 }
 
-void removeEntry(Map* map, char* name) {
+void removeEntryVectorMap(VectorMap* map, char* name) {
     if(map == NULL || name == NULL) return;
 
     for(int i = 0; i < map->size; i++) {
